@@ -1,0 +1,211 @@
+body {
+  font-family: sans-serif;
+  background: url("back.svg");
+  background-repeat: no-repeat;
+  background-size: 1400px 210px;
+}
+
+#logo {
+    display: none;
+    width: 100px;
+    height: 100px;
+}
+
+#logo[src*="http"] {
+   display: block;
+  margin-left: 480px;
+  margin-top: 25px;
+ }
+
+#StockTicker {
+  margin: 12px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  width: 600px;
+  margin-left: 350px;
+  padding: 11px 30px 11px 30px;
+  border-radius:10px;
+}
+
+.searchinput {
+    position: relative;
+    width: 600px;
+}
+
+.clearimage { position: absolute; top: 23px; left: 930px }
+
+.searchimage {
+    position: absolute;
+    top: 23px;
+    left: 360px;
+    /*border: 1px solid gray; */
+    /*border-radius: 2px;}*/
+}
+
+.clearimage:hover {
+    opacity: .5;
+}
+
+.searchimage:hover {
+    opacity: .5;
+}
+.searchinput img:hover {cursor:pointer;}
+
+.searchinput input {
+  padding: 11px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  width: 100%;
+  margin-left: 350px;
+  background:#fff;
+  box-sizing: border-box;
+  display:block;
+}
+
+.stocksearch {
+  text-align: center;
+  margin-top: 30px;
+  color: #363638;
+}
+
+#CompanyInfo {
+  margin-left: 350px;
+}
+
+#StockSummary {
+  margin-left: 400px;
+}
+
+#RecommendationTrends {
+  margin-left: 420px;
+}
+
+#RecommendationTrendsDisplay {
+  margin-top: 10px;
+  margin-left: 467px;
+  color: dimgrey;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #f5faf6;
+  width: 900px;
+  text-align: center;
+}
+
+
+li {
+  float: left
+}
+
+li button {
+  display: block;
+  color: dimgrey;
+  text-align: center;
+  padding: 14px 17px;
+  text-decoration: none;
+  background-color: #f5faf6;
+  border: none;
+}
+
+li button:hover {
+  background-color: #aeb0af;
+  cursor:pointer;
+}
+
+li button:focus {
+    background-color: #aeb0af;
+  cursor:pointer;
+}
+
+.tab {
+  text-align: center;
+  margin-top: 100px;
+  margin-left: 200px;
+}
+
+#CompanyInfo {
+    border-collapse:collapse;
+    margin-top: 15px;
+    color: dimgrey;
+}
+
+table.CompanyInfo td, table.CompanyInfo th {
+    border:1px solid #dee0e3;
+    padding:5px;
+}
+tr.cinfo td {
+    border-left: 0px solid;
+    border-right: 0px solid;
+}
+
+#StockSummary {
+    border-collapse:collapse;
+    margin-top: 15px;
+    color: dimgrey;
+}
+
+#CompanyNews {
+    border-collapse:collapse;
+    margin-top: 15px;
+    margin-left: 80px;
+    color: dimgrey;
+}
+
+table.StockSummary td, table.StockSummary th {
+    border:1px solid #dee0e3;
+    padding:5px;
+}
+
+tr.ssummary td {
+    border-left: 0px solid;
+    border-right: 0px solid;
+}
+
+#RecommendationTrends {
+  margin-top: 20px;
+}
+
+#testforerror {
+    margin-top: 150px;
+    width: 560px;
+    margin-left: 250px;
+    padding: 10px 12px;
+    background-color: #dee0df;
+    text-align: center;
+    font-family: Arial;
+    color: #4a4a4a;
+    border-radius: 10px;
+    border: #cccccc;
+}
+
+.searchimg {
+    width: 14px;
+    height: 17px;
+}
+
+.clearimg {
+    width: 14px;
+    height: 17px;
+    background-color: white;
+    border: 1px solid #ccc;
+    position: absolute; top: 2px; right: 5px;
+}
+
+#res {
+    max-width: 1000px;
+    max-height: 700px;
+    margin-left: 120px;
+    margin-top: 15px;
+}
+
+
+

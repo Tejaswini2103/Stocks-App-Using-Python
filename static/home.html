@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock Search</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="static/stylesheet_css.css"/>
+    <link rel="icon" href="data:;base64,iVBORwOKGO=" />
+</head>
+
+
+<body>
+<p class="stocksearch">Stock Search</p></div>
+
+<div class="searchinput">
+<input required="true" type="text" class="StockTicker" id="StockTicker" name="StockTicker"
+       placeholder="   Enter Stock Ticker Symbol">
+    <img src="static/search-solid.svg" id="MagnifyingGlass" class="searchimage" alt="Search" width="16px" onclick="getEverything()">
+
+<img src="static/times-solid.svg" class="clearimage" alt="clear" width="11px" onclick="cancel()">
+</div>
+
+<div class="tab" hidden="true">
+<ul>
+  <li><button class="tablinks" id="Company" onclick="getCompanyInfo()">Company</button></li>
+  <li><button class="tablinks" id="StockSummaryAndRecommendation" onclick="getStockSummary()">Stock Summary</button></li>
+  <li><button class="tablinks" id="Charts" onclick="getCandleSticks()">Charts</button></li>
+  <li><button class="tablinks" id="LatestNews" onclick="getCompanyNews()">Latest News</button></li>
+</ul>
+</div>
+
+<div id="res"></div>
+
+</body>
+
+<script>
+    var companyInfoCache = "";
+    var stockSummaryCache = "";
+    var chartsCache = "";
+    var companyNewsCache = "";
+    var currentStockTickerValue = "";
+
+    function cancel() {
+        document.getElementById('StockTicker').value = '';
+        $(".tab").hide();
+        $("#res").empty();
+        companyInfoCache = "";
+        stockSummaryCache = "";
+        chartsCache = "";
+        companyNewsCache = "";
+        currentStockTickerValue = "";
+        company_news = [];
+    }
+
+    var groupingUnits = [[
+        'day',
+        [7, 15]
+    ], [
+        'month',
+        [1, 3, 6]
+    ]];
+    var company_news = [];
+
+    const longEnUSFormatter = new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+
+    const longEnUSFormatterCompanyNews = new Intl.DateTimeFormat('en-US', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    });
+
+    function getCompanyInfo() {
+        var StockTicker = $('#StockTicker').val();
+        currentStockTickerValue = StockTicker;
+
+        if (!StockTicker) {
+            document.querySelector("input").reportValidity();
+            return;
+        }
+
+        if (companyInfoCache) {
+            renderCompanyInfo(companyInfoCache);
+            return;
+        }
+
+        $.ajax({
+            url: "/ticker/" + StockTicker,
+            type: "GET",
+        }).done(function (response) {
+            if(Object.keys(response).length === 0) {
+                $("#res").empty();
+                $(".tab").hide();
+                var testforerror = $('<p id="testforerror" style="display: block">Error: No record has been found, please enter a valid symbol</p>');
+                $("#res").html(testforerror);
+            }
+            else {
+                companyInfoCache = response;
+                renderCompanyInfo(companyInfoCache);
+            }
+        });
+    };
+
+    function renderCompanyInfo(response) {
+                        $(".tab").show();
+                $("#res").empty();
+                var image = $('<img id="logo" src=' + response["logo"] + '>');
+
+                var companyInfo = $('<table id=\"CompanyInfo\" class=\"CompanyInfo\"><tr class="cinfo"><td style="color: #2f2f30" align="right"><b>Company Name</b>' + '</td><td>' + response["name"] + '</tr>'
+                    + '<tr class="cinfo"><td style="color: #2f2f30" align="right"><b>Stock Ticker Symbol</b>' + '</td><td>' + response["ticker"] + '</tr>'
+                    + '<tr class="cinfo"><td style="color: #2f2f30" align="right"><b>Stock Exchange Code</b>' + '</td><td>' + response["exchange"] + '</>'
+                    + '<tr class="cinfo"><td style="color: #2f2f30" align="right"><b>Company Start Date</b>' + '</td><td>' + response["ipo"] + '</>'
+                    + '<tr class="cinfo"><td style="color: #2f2f30" align="right"><b>Category</b>' + '</td><td>' + response["finnhubIndustry"] + '</></table>"');
+
+                $("#res").append(image);
+                $("#res").append(companyInfo);
+    }
+
+    function getStockSummary() {
+        var StockTicker = $('#StockTicker').val();
+
+        if(stockSummaryCache) {
+            renderStockSummary(stockSummaryCache);
+            return;
+        }
+
+        $.ajax({
+            url: "/summary/" + StockTicker,
+            type: "GET",
+        }).done(function (response) {
+            stockSummaryCache = response;
+            //renderStockSummary(stockSummaryCache);
+        });
+    };
+
+    function renderStockSummary(response) {
+                    $(".tab").show();
+            $("#res").empty();
+
+            var tradingDay = new Date(response["t"] * 1000);
+
+            var changeDirection = "";
+            if (response["d"] < 0) {
+                changeDirection = '<img src="/static/RedArrowDown.png" width="20" height="10"/>'
+            }
+            if (response["d"] > 0) {
+                changeDirection = '<img src="/static/GreenArrowUp.png" width="20" height="10"/>'
+            }
+
+            var row = $('<table id=\"StockSummary\" class=\"StockSummary\"><tr class="ssummary"><td style="color: #2f2f30" align="right"><b>Stock Ticker Symbol</b>' + '</td><td ">' + currentStockTickerValue + '</tr>'
+                + '<tr class="ssummary"><td style="color: #2f2f30" align="right"><b>Trading Day</b>' + '</td><td>' + longEnUSFormatter.format(tradingDay) + '</tr>'
+                + '<tr class="ssummary"><td style="color: #2f2f30" align="right"><b>Previous Closing Price</b>' + '</td><td>' + response["pc"] + '</tr>'
+                + '<tr class="ssummary"><td style="color: #2f2f30" align="right"><b>Opening Price</b>' + '</td><td>' + response["o"] + '</tr>'
+                + '<tr class="ssummary"><td style="color: #2f2f30" align="right"><b>High Price</b>' + '</td><td>' + response["h"] + '</tr>'
+                + '<tr class="ssummary"><td style="color: #2f2f30" align="right"><b>Low Price</b>' + '</td><td>' + response["l"] + '</tr>'
+                + '<tr class="ssummary"><td style="color: #2f2f30" align="right"><b>Change</b>' + '</td><td>' + response["d"] + changeDirection + '</tr>'
+                + '<tr class="ssummary"><td style="color: #2f2f30" align="right"><b>Change Percent</b>' + '</td><td>' + response["dp"] + changeDirection + '</tr></table>');
+            var recommendationTrends = $('<table id=\"RecommendationTrends\" class=\"RecommendationTrends\"><tr>' +
+                '<td style="color:darkred; text-align: center">Strong <br/> Sell</td>' +
+                '<td bgcolor="red" style="color:white" width="32" height="30" align="center">' + response["strongSell"] + '</td>' +
+                '<td bgcolor=#8b4513 style="color:white" width="32" height="30" align="center">' + response["sell"] + '</td>' +
+                '<td bgcolor=#556b2f style="color:white" width="32" height="30" align="center">' + response["hold"] + '</td>' +
+                '<td bgcolor="green" style="color:white" width="32" height="30" align="center">' + response["buy"] + '</td>' +
+                '<td bgcolor="#adff2f" style="color:white" width="32" height="30" align="center">' + response["strongBuy"] + '</td>' +
+                '<td style="color:darkgreen; text-align: center">Strong <br/> Buy</td>' +
+                '</tr></table>');
+            var rtd = $('<table id=\"RecommendationTrendsDisplay\" class=\"RecommendationTrendsDisplay\"><tr><td>Recommendation Trends</td></tr></table>');
+            $('#res').append(row);
+            $('#res').append(recommendationTrends);
+            $('#res').append(rtd);
+
+    }
+
+    function getCandleSticks() {
+        var StockTicker = $('#StockTicker').val();
+
+        if(chartsCache) {
+            renderCharts(chartsCache);
+            return;
+        }
+
+        $.ajax({
+            url: "/stockcandles/" + StockTicker,
+            type: "GET",
+        }).done(function (response) {
+            chartsCache = response;
+            //renderCharts(chartsCache);
+        });
+    };
+
+    function renderCharts(response) {
+            $("#res").empty();
+
+            response = JSON.parse(response);
+            var date_volume = [];
+            var date_price = [];
+            var fromDate = new Date();
+            fromDate.setMonth(fromDate.getMonth()-6);
+
+            for (var i = 0; i < response[0].length; i++) {
+                date_volume.push([response[0][i][0] * 1000, response[0][i][1]])
+            }
+
+            for (var i = 0; i < response[1].length; i++) {
+                date_price.push([response[1][i][0] * 1000, response[1][i][1]])
+            }
+
+            // Create the chart
+            Highcharts.stockChart('res', {
+                plotOptions: {
+                    series: {
+                        cumulative: false,
+                        pointPlacement: 'on'
+                    }
+                },
+                title: {
+                    text: 'Stock Price ' + currentStockTickerValue + ' ' + fromDate.toISOString().slice(0, 10)
+                },
+                subtitle: {
+                    text: '<p><a style="color:darkslateblue;text-decoration:underline;" href="https://finnhub.io/" target="_blank">Source: Finnhub</a><p>'
+                },
+                chart: {
+                    alignTicks: false
+                },
+                rangeSelector: {
+                    selected: 0,
+                    enabled: true,
+                    buttons: [{
+                        type: 'day',
+                        count: 7,
+                        text: ' 7d'
+                    }, {
+                        type: 'day',
+                        count: 15,
+                        text: ' 15d'
+                    },
+                        {
+                            type: 'month',
+                            count: 1,
+                            text: ' 1m'
+                        },
+                        {
+                            type: 'month',
+                            count: 3,
+                            text: ' 3m'
+                        },
+                        {
+                            type: 'month',
+                            count: 6,
+                            text: ' 6m'
+                        },
+                    ],
+                    inputEnabled: false
+                }, yAxis: [
+                    {
+                        title: {
+                            text: 'Stock Price'
+                        },
+                        opposite: false,
+                        tickAmount: 6
+                    },
+                    {
+                        title: {
+                            text: 'Volume'
+                        },
+                        tickAmount: 6,
+                        opposite: true
+                    }],
+
+                series: [{
+                    name: 'Stock Price',
+                    data: date_price,
+                    yAxis: 0,
+                    type: 'area',
+                    fillColor: {
+                        linearGradient: {
+                            x1: 0,
+                            y1: 0,
+                            x2: 0,
+                            y2: 1
+                        },
+                        stops: [
+                            [0, Highcharts.getOptions().colors[0]],
+                            [1, Highcharts.color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                        ],
+                    }
+                },
+                    {
+                        type: 'column',
+                        name: 'Volume',
+                        yAxis: 1,
+                        pointWidth: 3,
+                        data: date_volume
+                    }
+                ]
+            });
+    }
+
+
+    var input = document.getElementById("StockTicker");
+    input.addEventListener("keyup", function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            getEverything();
+        }
+    });
+
+    function getCompanyNews() {
+        var StockTicker = $('#StockTicker').val();
+
+        if(companyNewsCache) {
+            renderCompanyNews(companyNewsCache);
+            return;
+        }
+
+        $.ajax({
+            url: "/companynews/" + StockTicker,
+            type: "GET",
+        }).done(function (response) {
+            companyNewsCache = response;
+            //renderCompanyNews(companyNewsCache);
+        });
+    }
+
+    function renderCompanyNews(response) {
+        response = JSON.parse(response);
+            $("#res").empty();
+            for (var i = 0; i < response.length && company_news.length < 5; i++) {
+                if (response[i]["datetime"] &&
+                    response[i]["headline"] &&
+                    response[i]["image"] &&
+                    response[i]["url"]) {
+                    company_news.push([response[i]]);
+                    console.log(response[i]["headline"]);
+                }
+            }
+
+
+            for (var i = 0; i < company_news.length; i++) {
+                var result = '<table id=\"CompanyNews\" class=\"CompanyNews\"><tr bgcolor="#f5faf6"><td style = "padding: 10px"><img width=80 height=80 src=' + company_news[i][0].image + '/> ' +
+                    '</td><td style="vertical-align:text-top; width: 780px; padding: 10px; font-size: 13px"><b style="color: #3e4040">' + company_news[i][0].headline + '</b><br>'
+                    + longEnUSFormatter.format(new Date(company_news[i][0].datetime * 1000)) +
+                    '<br><a href="' + company_news[i][0].url + '" target="_blank">See Original Post</a>' +
+                    '</td></tr></table>';
+                $("#res").append(result);
+            }
+    }
+
+    function getEverything() {
+        var newStockTickerValue = $('#StockTicker').val();
+        if(currentStockTickerValue !== newStockTickerValue) {
+            console.log("clean up");
+            companyInfoCache = "";
+            stockSummaryCache = "";
+            chartsCache = "";
+            companyNewsCache = "";
+            currentStockTickerValue = "";
+            company_news = [];
+        } else {
+            getCompanyInfo();
+            return;
+        }
+
+        getCompanyInfo();
+        getStockSummary();
+        getCandleSticks();
+        getCompanyNews();
+    }
+</script>
+
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/modules/data.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/stock/modules/drag-panes.js"></script>
+
+</html>
